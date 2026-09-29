@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入 A-Frame 與 MindAR 庫 -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+      /* 啟動按鈕樣式 */
+      #startButton {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        padding: 12px 24px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 點擊按鈕解除瀏覽器的音訊限制並播放影片 -->
+    <button id="startButton">點擊開始 AR 體驗</button>
+
+    <a-scene 
+      mindar-image="imageTargetSrc: ./trophy.mind;" 
+      color-space="sRGB" 
+      renderer="colorManagement: true, physicallyCorrectLights" 
+      vr-mode-ui="enabled: false" 
+      device-orientation-permission-ui="enabled: false">
+
+      <a-assets>
+        <!-- 載入影片資源 -->
+        <video id="arVideo" src="./video.mp4" preload="auto" loop crossorigin="anonymous" webkit-playsinline playsinline></video>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- 綁定圖像追蹤目標 -->
+      <a-entity id="target" mindar-image-target="targetIndex: 0">
+        <!-- 影片播放平面 Plane：可根據獎盃形狀調整 width 和 height -->
+        <a-video src="#arVideo" width="1" height="0.75" position="0 0 0" rotation="0 0 0"></a-video>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      const video = document.querySelector('#arVideo');
+      const startButton = document.querySelector('#startButton');
+      const targetEntity = document.querySelector('#target');
+
+      // 點擊 Start 按鈕，預先載入/準備影片播放
+      startButton.addEventListener('click', () => {
+        video.play();
+        video.pause(); // 預備播放狀態
+        startButton.style.display = 'none'; // 隱藏按鈕
+      });
+
+      // 當辨識到水晶獎盃時，播放影片
+      targetEntity.addEventListener("targetFound", () => {
+        video.play();
+      });
+
+      // 當鏡頭移開獎盃時，暫停影片
+      targetEntity.addEventListener("targetLost", () => {
+        video.pause();
+      });
+    </script>
+  </body>
+</html>
